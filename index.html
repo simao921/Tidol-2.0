@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tidol - Loja de tecnologia com os melhores produtos a preços incríveis.">
+  <meta name="keywords" content="tecnologia, smartphones, laptops, tidol">
+  <meta name="author" content="Tidol">
+  <title>Tidol - Loja de Tecnologia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=AfdaaB-AlwGPE5MYpZ-fqSs0AymqEbAto3Fr4jrUmOXpCHzvi1uAf2elkggC1cjLHx4qJJV2kjU3rleK&currency=EUR"></script>
+  <style>
+    .pp-89QUDUPGDGVSW { background-color: #FFD140; color: #000; padding: 10px 20px; border-radius: 5px; }
+    .theme-dark { background-color: #1a202c; color: #e2e8f0; }
+    .theme-dark .bg-white { background-color: #2d3748; }
+    .theme-dark .text-gray-800 { color: #e2e8f0; }
+    .theme-dark .bg-gray-100 { background-color: #4a5568; }
+    #chatbot { max-height: 300px; overflow-y: auto; }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md p-4 sticky top-0 z-50">
+    <div class="container mx-auto flex justify-between items-center">
+      <a href="#products" class="flex items-center">
+        <img src="https://images.unsplash.com/photo-1516321310766-66a4fa1f2450?w=50" alt="Logo Tidol" class="h-10 mr-2">
+        <span class="text-2xl font-bold text-gray-800">Tidol</span>
+      </a>
+      <div class="flex items-center space-x-4">
+        <input type="text" id="search" placeholder="Procurar produtos..." class="border p-2 rounded" aria-label="Pesquisar produtos">
+        <a href="#cart" class="text-gray-600 hover:text-gray-800" aria-label="Carrinho de Compras">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        </a>
+        <a href="#account" class="text-gray-600 hover:text-gray-800" aria-label="Conta">Conta</a>
+        <a href="#admin" class="text-gray-600 hover:text-gray-800" aria-label="Admin">Admin</a>
+        <button id="theme-toggle" class="text-gray-600 hover:text-gray-800" aria-label="Alternar tema">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Banner Carrossel -->
+  <section id="banner" class="bg-white py-8">
+    <div class="container mx-auto">
+      <div id="carousel" class="relative">
+        <div class="carousel-item">
+          <div class="text-center">
+            <h2 class="text-3xl font-bold">DIAS SEM IVA: Poupe 23%!</h2>
+            <p class="text-lg">Válido até 30/04/2025</p>
+            <p id="iva-timer" class="text-sm"></p>
+          </div>
+        </div>
+        <div class="carousel-item hidden">
+          <div class="text-center">
+            <h2 class="text-3xl font-bold">Oferta Especial: 10% com APRIL2025!</h2>
+            <p class="text-lg">Válida até 30/04/2025</p>
+          </div>
+        </div>
+        <div class="carousel-item hidden">
+          <div class="text-center">
+            <h2 class="text-3xl font-bold">Novos Smartphones!</h2>
+            <p class="text-lg">Descubra as últimas novidades</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Produtos -->
+  <section id="products" class="container mx-auto py-8">
+    <h2 class="text-2xl font-bold mb-4">Produtos</h2>
+    <div class="flex justify-between mb-4">
+      <select id="sort" class="border p-2 rounded" aria-label="Ordenar por preço">
+        <option value="asc">Preço: Crescente</option>
+        <option value="desc">Preço: Decrescente</option>
+      </select>
+    </div>
+    <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    <div id="pagination" class="flex justify-center mt-4"></div>
+  </section>
+
+  <!-- Modal de Detalhes do Produto -->
+  <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="modal-title">
+    <div class="bg-white p-6 rounded max-w-lg w-full">
+      <h3 id="modal-title" class="text-xl font-bold"></h3>
+      <p id="modal-price" class="text-lg"></p>
+      <p id="modal-stock" class="text-sm"></p>
+      <div id="modal-specs" class="mt-2"></div>
+      <div id="modal-reviews" class="mt-2"></div>
+      <div class="mt-2">
+        <h4 class="font-bold">Adicionar Avaliação</h4>
+        <select id="review-stars" class="border p-1 rounded" aria-label="Avaliação em estrelas">
+          <option value="1">1 Estrela</option>
+          <option value="2">2 Estrelas</option>
+          <option value="3">3 Estrelas</option>
+          <option value="4">4 Estrelas</option>
+          <option value="5">5 Estrelas</option>
+        </select>
+        <textarea id="review-comment" class="border p-2 w-full mt-1" placeholder="Comentário..." aria-label="Comentário da avaliação"></textarea>
+        <button id="add-review" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">Enviar Avaliação</button>
+      </div>
+      <button id="add-to-cart" class="bg-green-500 text-white px-4 py-2 rounded mt-4">Adicionar ao Carrinho</button>
+      <button id="add-to-favorites" class="bg-yellow-500 text-white px-4 py-2 rounded mt-2">Adicionar aos Favoritos</button>
+      <button id="close-modal" class="bg-red-500 text-white px-4 py-2 rounded mt-2">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Carrinho -->
+  <section id="cart" class="container mx-auto py-8 hidden">
+    <h2 class="text-2xl font-bold mb-4">Carrinho de Compras</h2>
+    <div id="cart-items" class="space-y-4"></div>
+    <p id="cart-total" class="text-xl font-bold mt-4"></p>
+    <div class="mt-4">
+      <input type="text" id="discount-code" placeholder="Código de desconto (ex.: APRIL2025)" class="border p-2 rounded">
+      <button id="apply-discount" class="bg-blue-500 text-white px-4 py-2 rounded">Aplicar</button>
+    </div>
+    <button id="proceed-to-checkout" class="bg-green-500 text-white px-4 py-2 rounded mt-4">Finalizar Compra</button>
+  </section>
+
+  <!-- Checkout -->
+  <section id="checkout" class="container mx-auto py-8 hidden">
+    <h2 class="text-2xl font-bold mb-4">Finalizar Compra</h2>
+    <form id="checkout-form" class="space-y-4">
+      <input type="text" id="name" placeholder="Nome" class="border p-2 w-full rounded" required aria-label="Nome">
+      <input type="email" id="email" placeholder="E-mail" class="border p-2 w-full rounded" required aria-label="E-mail">
+      <input type="tel" id="phone" placeholder="Telemóvel" class="border p-2 w-full rounded" required aria-label="Telemóvel">
+      <input type="text" id="address" placeholder="Morada" class="border p-2 w-full rounded" required aria-label="Morada">
+      <input type="text" id="postal-code" placeholder="Código Postal" class="border p-2 w-full rounded" required aria-label="Código Postal">
+      <div id="cart-summary" class="space-y-2"></div>
+      <div id="paypal-button-container" class="mt-4"></div>
+    </form>
+  </section>
+
+  <!-- Conta -->
+  <section id="account" class="container mx-auto py-8 hidden">
+    <h2 class="text-2xl font-bold mb-4">Minha Conta</h2>
+    <div id="login-form" class="space-y-2 max-w-sm">
+      <input type="email" id="login-email" placeholder="E-mail" class="border p-2 w-full rounded" aria-label="E-mail">
+      <input type="password" id="login-password" placeholder="Palavra-passe" class="border p-2 w-full rounded" aria-label="Palavra-passe">
+      <button id="login-btn" class="bg-blue-500 text-white px-4 py-2 rounded w-full">Iniciar Sessão</button>
+      <p class="text-sm"><a href="#" id="show-register" class="text-blue-500">Criar conta</a></p>
+    </div>
+    <div id="register-form" class="space-y-2 max-w-sm hidden">
+      <input type="text" id="register-name" placeholder="Nome" class="border p-2 w-full rounded" aria-label="Nome">
+      <input type="email" id="register-email" placeholder="E-mail" class="border p-2 w-full rounded" aria-label="E-mail">
+      <input type="password" id="register-password" placeholder="Palavra-passe" class="border p-2 w-full rounded" aria-label="Palavra-passe">
+      <button id="register-btn" class="bg-blue-500 text-white px-4 py-2 rounded w-full">Criar Conta</button>
+      <p class="text-sm"><a href="#" id="show-login" class="text-blue-500">Já tem conta?</a></p>
+    </div>
+    <div id="account-details" class="space-y-2 hidden">
+      <p class="text-sm"><strong>E-mail:</strong> <span id="user-email"></span></p>
+      <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded w-full max-w-sm">Terminar Sessão</button>
+      <h3 class="text-lg font-bold mt-4">Acompanhamento de Pedido</h3>
+      <div class="space-y-2 max-w-sm">
+        <input type="text" id="track-order-id" placeholder="ID do Pedido" class="border p-2 w-full rounded" aria-label="ID do Pedido">
+        <button id="track-order-btn" class="bg-blue-500 text-white px-4 py-2 rounded w-full">Consultar</button>
+        <div id="track-order-result" class="space-y-2"></div>
+      </div>
+      <h3 class="text-lg font-bold mt-4">Favoritos</h3>
+      <div id="favorites-list" class="space-y-2"></div>
+      <h3 class="text-lg font-bold mt-4">Histórico de Pedidos</h3>
+      <div id="order-history" class="space-y-2"></div>
+    </div>
+  </section>
+
+  <!-- Admin -->
+  <section id="admin" class="container mx-auto py-8 hidden">
+    <h2 class="text-2xl font-bold mb-4">Painel de Administração</h2>
+    <div id="admin-login" class="space-y-4">
+      <input type="text" id="admin-username" placeholder="Utilizador" class="border p-2 w-full rounded" aria-label="Utilizador">
+      <input type="password" id="admin-password" placeholder="Palavra-passe" class="border p-2 w-full rounded" aria-label="Palavra-passe">
+      <button id="admin-login-btn" class="bg-blue-500 text-white px-4 py-2 rounded">Iniciar Sessão</button>
+    </div>
+    <div id="admin-panel" class="space-y-4 hidden">
+      <h3 class="text-xl font-bold">Adicionar Produto</h3>
+      <form id="add-product-form" class="space-y-4">
+        <input type="text" id="product-name" placeholder="Nome do Produto" class="border p-2 w-full rounded" required aria-label="Nome do Produto">
+        <input type="number" id="product-price" placeholder="Preço (€, com IVA)" class="border p-2 w-full rounded" required aria-label="Preço">
+        <input type="number" id="product-stock" placeholder="Stock" class="border p-2 w-full rounded" required aria-label="Stock">
+        <textarea id="product-specs" placeholder="Especificações (ex.: Processador: Intel i7, RAM: 16GB)" class="border p-2 w-full rounded" aria-label="Especificações"></textarea>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Adicionar Produto</button>
+      </form>
+      <h3 class="text-xl font-bold mt-4">Pedidos</h3>
+      <div id="order-list" class="space-y-4"></div>
+      <h3 class="text-xl font-bold mt-4">Clientes</h3>
+      <div id="customer-list" class="space-y-4"></div>
+      <h3 class="text-xl font-bold mt-4">Controlo de Vendas</h3>
+      <select id="sales-filter" class="border p-2 rounded" aria-label="Filtrar vendas por período">
+        <option value="all">Todas</option>
+        <option value="7days">Últimos 7 dias</option>
+        <option value="30days">Últimos 30 dias</option>
+      </select>
+      <canvas id="sales-chart" class="mt-4"></canvas>
+      <button id="export-csv" class="bg-green-500 text-white px-4 py-2 rounded mt-4">Exportar Dados (CSV)</button>
+    </div>
+  </section>
+
+  <!-- Chatbot -->
+  <div id="chatbot-container" class="fixed bottom-4 right-4 z-50">
+    <button id="chatbot-toggle" class="bg-blue-500 text-white p-3 rounded-full" aria-label="Abrir chatbot">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+    </button>
+    <div id="chatbot" class="bg-white shadow-lg rounded-lg p-4 w-80 hidden">
+      <h3 class="text-lg font-bold mb-2">Suporte Tidol</h3>
+      <div id="chatbot-messages" class="space-y-2 mb-2"></div>
+      <input type="text" id="chatbot-input" placeholder="Escreva a sua dúvida..." class="border p-2 w-full rounded" aria-label="Mensagem para o chatbot">
+      <button id="chatbot-send" class="bg-blue-500 text-white px-4 py-2 rounded mt-2 w-full">Enviar</button>
+    </div>
+  </div>
+
+  <!-- Notificações -->
+  <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded hidden"></div>
+
+  <script>
+    // Produtos com nomes realistas
+    const productNames = [
+      "Samsung Galaxy S23", "iPhone 14 Pro", "Google Pixel 8", "OnePlus 11", "Xiaomi 13 Pro",
+      "MacBook Air M2", "Dell XPS 13", "HP Spectre x360", "Lenovo ThinkPad X1 Carbon", "Asus ZenBook 14",
+      "Sony WH-1000XM5", "Bose QuietComfort 45", "Apple AirPods Pro 2", "JBL Flip 6", "Anker Soundcore Q30",
+      "Samsung Galaxy Watch 6", "Apple Watch Series 9", "Garmin Venu 3", "Fitbit Charge 6", "Huawei Watch GT 4",
+      "iPad Air 5", "Samsung Galaxy Tab S9", "Microsoft Surface Pro 9", "Lenovo Tab P12 Pro", "Amazon Kindle Paperwhite",
+      "Asus ROG Strix Scar 18", "MSI Stealth 16", "Razer Blade 15", "Acer Predator Helios 300", "Alienware m16",
+      "Sony PlayStation 5", "Xbox Series X", "Nintendo Switch OLED", "Steam Deck", "Logitech G Pro X",
+      "Canon EOS R6", "Sony Alpha 7 IV", "Nikon Z6 II", "Fujifilm X-T5", "GoPro Hero 12",
+      "DJI Mavic 3", "DJI Mini 4 Pro", "Autel EVO Nano+", "Parrot Anafi", "Skydio 2+",
+      "Samsung QN90C QLED TV", "LG OLED C3", "Sony Bravia XR A80L", "TCL 6-Series Roku TV", "Hisense U8K",
+      "WD Black SN850X SSD", "Samsung 990 Pro SSD", "Seagate FireCuda 530", "Crucial MX500", "Kingston NV2",
+      "Logitech MX Master 3S", "Razer DeathAdder V3", "SteelSeries Apex Pro", "Corsair K70 RGB", "HyperX Cloud Alpha"
+    ];
+    let products = JSON.parse(localStorage.getItem('products')) || Array.from({ length: 60 }, (_, i) => ({
+      id: i + 1,
+      name: productNames[i],
+      price: (Math.random() * 4800 + 200).toFixed(2), // Preços aumentados: €200 a €5000
+      stock: Math.floor(Math.random() * 100),
+      specs: `Processador: Exemplo ${i + 1}, RAM: ${Math.floor(Math.random() * 32)}GB, Armazenamento: ${Math.floor(Math.random() * 512)}GB, Ecrã: ${Math.random() * 17} polegadas`,
+      reviews: []
+    }));
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    let users = JSON.parse(localStorage.getItem('users')) || [{ name: 'Teste', email: 'teste@tidol.pt', password: '123456' }];
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    let currentUser = null;
+    let currentPage = 1;
+    const productsPerPage = 12;
+    const IVA_RATE = 0.23; // 23% IVA em Portugal
+
+    // Funções auxiliares
+    const saveToLocalStorage = () => {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      localStorage.setItem('orders', JSON.stringify(orders));
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      localStorage.setItem('products', JSON.stringify(products));
+    };
+
+    const showNotification = (message) => {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.classList.remove('hidden');
+      setTimeout(() => notification.classList.add('hidden'), 3000);
+    };
+
+    const validateEmail = (email) => /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
+
+    // Calcular preço sem IVA (DIAS SEM IVA)
+    const getPriceWithoutIVA = (price) => (parseFloat(price) / (1 + IVA_RATE)).toFixed(2);
+
+    // Temporizador para DIAS SEM IVA
+    const updateIVATimer = () => {
+      const endDate = new Date('2025-04-30T23:59:59');
+      const now = new Date();
+      const timeLeft = endDate - now;
+      if (timeLeft <= 0) {
+        document.getElementById('iva-timer').textContent = 'Promoção terminada!';
+        return;
+      }
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      document.getElementById('iva-timer').textContent = `Faltam ${days} dias e ${hours} horas`;
+    };
+    setInterval(updateIVATimer, 1000 * 60 * 60); // Atualiza a cada hora
+    updateIVATimer();
+
+    // Chatbot simples
+    const chatbotResponses = {
+      'status': 'Consulte o status do seu pedido na seção "Minha Conta" com o ID do pedido.',
+      'devolver': 'Aceda à sua conta e consulte a política de devoluções ou contacte o suporte.',
+      'defeito': 'Lamentamos o inconveniente. Contacte o suporte com o número do pedido.',
+      'entrega': 'O prazo de entrega é de 3 a 5 dias úteis para Portugal.',
+      'garantia': 'Os produtos têm garantia de 2 anos. Consulte os detalhes na sua conta.',
+      'default': 'Desculpe, não entendi. Tente perguntas como "status do pedido" ou "devolver produto".'
+    };
+    document.getElementById('chatbot-toggle').onclick = () => {
+      const chatbot = document.getElementById('chatbot');
+      chatbot.classList.toggle('hidden');
+    };
+    document.getElementById('chatbot-send').onclick = () => {
+      const input = document.getElementById('chatbot-input');
+      const message = input.value.trim().toLowerCase();
+      if (!message) return;
+      const messages = document.getElementById('chatbot-messages');
+      messages.innerHTML += `<p class="text-sm"><strong>Você:</strong> ${message}</p>`;
+      const response = Object.keys(chatbotResponses).find(key => message.includes(key)) ? chatbotResponses[Object.keys(chatbotResponses).find(key => message.includes(key))] : chatbotResponses['default'];
+      messages.innerHTML += `<p class="text-sm"><strong>TidolBot:</strong> ${response}</p>`;
+      messages.scrollTop = messages.scrollHeight;
+      input.value = '';
+    };
+
+    // Carrossel de banners
+    const carouselItems = document.querySelectorAll('.carousel-item');
+    let carouselIndex = 0;
+    setInterval(() => {
+      carouselItems[carouselIndex].classList.add('hidden');
+      carouselIndex = (carouselIndex + 1) % carouselItems.length;
+      carouselItems[carouselIndex].classList.remove('hidden');
+    }, 5000);
+
+    // Exibir produtos
+    const displayProducts = () => {
+      const productList = document.getElementById('product-list');
+      productList.innerHTML = '';
+      const search = document.getElementById('search').value.toLowerCase();
+      const sort = document.getElementById('sort').value;
+      let filteredProducts = products.filter(p => p.name.toLowerCase().includes(search));
+      filteredProducts.sort((a, b) => sort === 'asc' ? getPriceWithoutIVA(a.price) - getPriceWithoutIVA(b.price) : getPriceWithoutIVA(b.price) - getPriceWithoutIVA(a.price));
+      const start = (currentPage - 1) * productsPerPage;
+      const end = start + productsPerPage;
+      filteredProducts.slice(start, end).forEach(product => {
+        const priceWithoutIVA = getPriceWithoutIVA(product.price);
+        const productCard = `
+          <div class="bg-white p-4 rounded shadow hover:shadow-lg transition">
+            <h3 class="text-lg font-bold"><a href="#product-${product.id}" class="text-blue-500">${product.name}</a></h3>
+            <p>Preço: €${priceWithoutIVA} (€${product.price} com IVA)</p>
+            <p>Stock: ${product.stock}</p>
+            <button onclick="openProductModal(${product.id})" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">Ver Detalhes</button>
+          </div>
+        `;
+        productList.innerHTML += productCard;
+      });
+      displayPagination(filteredProducts.length);
+    };
+
+    // Paginação
+    const displayPagination = (total) => {
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+      const pageCount = Math.ceil(total / productsPerPage);
+      for (let i = 1; i <= pageCount; i++) {
+        const button = `<button class="px-4 py-2 ${i === currentPage ? 'bg-blue-500 text-white' : 'bg-white'} border rounded mx-1" onclick="changePage(${i})">${i}</button>`;
+        pagination.innerHTML += button;
+      }
+    };
+
+    const changePage = (page) => {
+      currentPage = page;
+      displayProducts();
+    };
+
+    // Modal de produto
+    const openProductModal = (id) => {
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+      const priceWithoutIVA = getPriceWithoutIVA(product.price);
+      document.getElementById('modal-title').textContent = product.name;
+      document.getElementById('modal-price').textContent = `Preço: €${priceWithoutIVA} (€${product.price} com IVA)`;
+      document.getElementById('modal-price').innerHTML += `<br><span class="text-green-500 text-sm">DIAS SEM IVA: 23% de desconto aplicado</span>`;
+      document.getElementById('modal-stock').textContent = `Stock: ${product.stock}`;
+      document.getElementById('modal-specs').innerHTML = `<h4 class="font-bold">Especificações:</h4><p>${product.specs}</p>`;
+      const reviews = product.reviews.map(r => `<p>${'★'.repeat(r.stars)} ${r.comment} - ${r.user}</p>`).join('');
+      document.getElementById('modal-reviews').innerHTML = `<h4 class="font-bold">Avaliações:</h4>${reviews || 'Sem avaliações'}`;
+      document.getElementById('add-to-cart').onclick = () => addToCart(product.id);
+      document.getElementById('add-to-favorites').onclick = () => addToFavorites(product.id);
+      document.getElementById('add-review').onclick = () => addReview(product.id);
+      document.getElementById('product-modal').classList.remove('hidden');
+      window.location.hash = `product-${id}`;
+    };
+
+    document.getElementById('close-modal').onclick = () => {
+      document.getElementById('product-modal').classList.add('hidden');
+      window.location.hash = '';
+    };
+
+    // Carrinho
+    const addToCart = (id) => {
+      const product = products.find(p => p.id === id);
+      if (product.stock === 0) {
+        showNotification('Produto esgotado!');
+        return;
+      }
+      const item = cart.find(i => i.id === id);
+      if (item) {
+        if (item.quantity < product.stock) {
+          item.quantity++;
+        } else {
+          showNotification('Stock máximo atingido!');
+        }
+      } else {
+        cart.push({ id, quantity: 1 });
+      }
+      saveToLocalStorage();
+      showNotification('Produto adicionado ao carrinho!');
+      displayCart();
+    };
+
+    const displayCart = () => {
+      const cartItems = document.getElementById('cart-items');
+      cartItems.innerHTML = '';
+      let total = 0;
+      cart.forEach(item => {
+        const product = products.find(p => p.id === item.id);
+        if (!product) return;
+        const priceWithoutIVA = getPriceWithoutIVA(product.price);
+        total += parseFloat(priceWithoutIVA) * item.quantity;
+        const cartItem = `
+          <div class="flex justify-between items-center bg-white p-4 rounded shadow">
+            <div>
+              <h3 class="text-lg font-bold">${product.name}</h3>
+              <p>Preço: €${priceWithoutIVA} (€${product.price} com IVA)</p>
+              <p>Quantidade: <input type="number" min="1" max="${product.stock}" value="${item.quantity}" onchange="updateCart(${item.id}, this.value)" class="border p-1 w-16"></p>
+            </div>
+            <button onclick="removeFromCart(${item.id})" class="text-red-500">Remover</button>
+          </div>
+        `;
+        cartItems.innerHTML += cartItem;
+      });
+      const discount = document.getElementById('discount-code').value.toUpperCase() === 'APRIL2025' ? total * 0.1 : 0;
+      document.getElementById('cart-total').textContent = `Total: €${(total - discount).toFixed(2)} ${discount ? `(Desconto APRIL2025: €${discount.toFixed(2)})` : ''}`;
+    };
+
+    const updateCart = (id, quantity) => {
+      const product = products.find(p => p.id === id);
+      if (parseInt(quantity) > product.stock) {
+        showNotification('Stock máximo atingido!');
+        return;
+      }
+      const item = cart.find(i => i.id === id);
+      if (parseInt(quantity) <= 0) {
+        cart = cart.filter(i => i.id !== id);
+      } else {
+        item.quantity = parseInt(quantity);
+      }
+      saveToLocalStorage();
+      displayCart();
+    };
+
+    const removeFromCart = (id) => {
+      cart = cart.filter(i => i.id !== id);
+      saveToLocalStorage();
+      displayCart();
+    };
+
+    document.getElementById('apply-discount').onclick = () => {
+      displayCart();
+      const code = document.getElementById('discount-code').value.toUpperCase();
+      showNotification(code === 'APRIL2025' ? 'Desconto aplicado!' : 'Código inválido!');
+    };
+
+    document.getElementById('proceed-to-checkout').onclick = () => {
+      if (cart.length === 0) {
+        showNotification('Carrinho vazio!');
+        return;
+      }
+      document.getElementById('cart').classList.add('hidden');
+      document.getElementById('checkout').classList.remove('hidden');
+      displayCheckout();
+    };
+
+    // Checkout
+    const displayCheckout = () => {
+      const summary = document.getElementById('cart-summary');
+      summary.innerHTML = '';
+      let total = 0;
+      cart.forEach(item => {
+        const product = products.find(p => p.id === item.id);
+        if (!product) return;
+        const priceWithoutIVA = getPriceWithoutIVA(product.price);
+        total += parseFloat(priceWithoutIVA) * item.quantity;
+        summary.innerHTML += `<p>${product.name} x${item.quantity}: €${(parseFloat(priceWithoutIVA) * item.quantity).toFixed(2)}</p>`;
+      });
+      const discount = document.getElementById('discount-code').value.toUpperCase() === 'APRIL2025' ? total * 0.1 : 0;
+      summary.innerHTML += `<p><strong>Total:</strong> €${(total - discount).toFixed(2)}</p>`;
+      if (discount) summary.innerHTML += `<p class="text-green-500">Desconto APRIL2025: €${discount.toFixed(2)}</p>`;
+      paypal.Buttons({
+        createOrder: (data, actions) => {
+          const form = document.getElementById('checkout-form');
+          if (!form.checkValidity() || !validateEmail(form.email.value)) {
+            showNotification('Preencha todos os campos corretamente!');
+            form.reportValidity();
+            return;
+          }
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: (total - discount).toFixed(2),
+                currency_code: 'EUR'
+              }
+            }]
+          });
+        },
+        onApprove: (data, actions) => {
+          return actions.order.capture().then(details => {
+            const form = document.getElementById('checkout-form');
+            const order = {
+              id: orders.length + 1,
+              date: new Date().toISOString(),
+              name: form.name.value,
+              email: form.email.value,
+              phone: form.phone.value,
+              address: form.address.value,
+              postalCode: form.postalCode.value,
+              items: cart,
+              total: total - discount,
+              discount: discount,
+              discountCode: document.getElementById('discount-code').value.toUpperCase(),
+              paymentId: details.id,
+              status: 'Processando' // Estado inicial
+            };
+            orders.push(order);
+            cart.forEach(item => {
+              const product = products.find(p => p.id === item.id);
+              if (product) product.stock -= item.quantity;
+            });
+            cart = [];
+            saveToLocalStorage();
+            showNotification('Pagamento concluído! Pedido registrado.');
+            document.getElementById('checkout').classList.add('hidden');
+            document.getElementById('products').classList.remove('hidden');
+            displayProducts();
+          });
+        }
+      }).render('#paypal-button-container');
+    };
+
+    // Conta
+    document.getElementById('show-register').onclick = (e) => {
+      e.preventDefault();
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('register-form').classList.remove('hidden');
+    };
+
+    document.getElementById('show-login').onclick = (e) => {
+      e.preventDefault();
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+    };
+
+    document.getElementById('login-btn').onclick = () => {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      if (!validateEmail(email)) {
+        showNotification('E-mail inválido!');
+        return;
+      }
+      const user = users.find(u => u.email === email && u.password === password);
+      if (user) {
+        currentUser = user;
+        document.getElementById('login-form').classList.add('hidden');
+        document.getElementById('account-details').classList.remove('hidden');
+        document.getElementById('user-email').textContent = user.email;
+        displayOrderHistory();
+        displayFavorites();
+        document.getElementById('track-order-result').innerHTML = '';
+        showNotification('Sessão iniciada!');
+      } else {
+        showNotification('E-mail ou palavra-passe inválidos!');
+      }
+    };
+
+    document.getElementById('register-btn').onclick = () => {
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value;
+      const password = document.getElementById('register-password').value;
+      if (!name || !email || !password) {
+        showNotification('Preencha todos os campos!');
+        return;
+      }
+      if (!validateEmail(email)) {
+        showNotification('E-mail inválido!');
+        return;
+      }
+      if (users.find(u => u.email === email)) {
+        showNotification('E-mail já registrado!');
+        return;
+      }
+      users.push({ name, email, password });
+      saveToLocalStorage();
+      showNotification('Conta criada! Inicie sessão.');
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+    };
+
+    document.getElementById('logout-btn').onclick = () => {
+      currentUser = null;
+      document.getElementById('account-details').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+      showNotification('Sessão terminada!');
+    };
+
+    // Acompanhamento de Pedido
+    document.getElementById('track-order-btn').onclick = () => {
+      if (!currentUser) {
+        showNotification('Inicie sessão para consultar pedidos!');
+        return;
+      }
+      const orderId = document.getElementById('track-order-id').value;
+      const order = orders.find(o => o.id === parseInt(orderId) && o.email === currentUser.email);
+      const resultDiv = document.getElementById('track-order-result');
+      if (!order) {
+        resultDiv.innerHTML = `<p class="text-red-500">Pedido não encontrado ou não pertence a esta conta.</p>`;
+        return;
+      }
+      resultDiv.innerHTML = `
+        <div class="bg-white p-4 rounded shadow text-sm">
+          <p><strong>Pedido #${order.id}</strong> - ${new Date(order.date).toLocaleDateString('pt-PT')}</p>
+          <p><strong>Status:</strong> ${order.status || 'Processando'}</p>
+          <p><strong>Itens:</strong></p>
+          <ul class="list-disc pl-5">
+            ${order.items.map(item => {
+              const product = products.find(p => p.id === item.id);
+              return `<li>${product ? product.name : 'Produto removido'} x${item.quantity}</li>`;
+            }).join('')}
+          </ul>
+          <p><strong>Total:</strong> €${order.total.toFixed(2)}</p>
+          <p><strong>Morada:</strong> ${order.address}, ${order.postalCode}</p>
+        </div>
+      `;
+    };
+
+    const displayOrderHistory = () => {
+      const orderHistory = document.getElementById('order-history');
+      orderHistory.innerHTML = '';
+      const userOrders = orders.filter(o => o.email === currentUser.email).slice(0, 5);
+      userOrders.forEach(order => {
+        const orderCard = `
+          <div class="bg-white p-2 rounded shadow text-sm">
+            <p><strong>#${order.id}</strong> - ${new Date(order.date).toLocaleDateString('pt-PT')} - €${order.total.toFixed(2)} - ${order.status || 'Processando'}</p>
+          </div>
+        `;
+        orderHistory.innerHTML += orderCard;
+      });
+    };
+
+    const displayFavorites = () => {
+      const favoritesList = document.getElementById('favorites-list');
+      favoritesList.innerHTML = '';
+      favorites.filter(f => f.email === currentUser.email).slice(0, 5).forEach(fav => {
+        const product = products.find(p => p.id === fav.productId);
+        if (!product) return;
+        const favCard = `
+          <div class="bg-white p-2 rounded shadow text-sm flex justify-between">
+            <p>${product.name}</p>
+            <button onclick="removeFromFavorites(${product.id})" class="text-red-500 text-xs">Remover</button>
+          </div>
+        `;
+        favoritesList.innerHTML += favCard;
+      });
+    };
+
+    const addToFavorites = (id) => {
+      if (!currentUser) {
+        showNotification('Inicie sessão para adicionar aos favoritos!');
+        return;
+      }
+      if (favorites.find(f => f.email === currentUser.email && f.productId === id)) {
+        showNotification('Produto já está nos favoritos!');
+        return;
+      }
+      favorites.push({ email: currentUser.email, productId: id });
+      saveToLocalStorage();
+      showNotification('Adicionado aos favoritos!');
+      displayFavorites();
+    };
+
+    const removeFromFavorites = (id) => {
+      favorites = favorites.filter(f => !(f.email === currentUser.email && f.productId === id));
+      saveToLocalStorage();
+      displayFavorites();
+    };
+
+    const addReview = (id) => {
+      if (!currentUser) {
+        showNotification('Inicie sessão para avaliar!');
+        return;
+      }
+      const stars = parseInt(document.getElementById('review-stars').value);
+      const comment = document.getElementById('review-comment').value;
+      if (!comment) {
+        showNotification('Escreva um comentário!');
+        return;
+      }
+      const product = products.find(p => p.id === id);
+      product.reviews.push({ stars, comment, user: currentUser.name });
+      saveToLocalStorage();
+      openProductModal(id);
+      showNotification('Avaliação enviada!');
+    };
+
+    // Admin
+    document.getElementById('admin-login-btn').onclick = () => {
+      const username = document.getElementById('admin-username').value;
+      const password = document.getElementById('admin-password').value;
+      if (username === 'simaojanuario' && password === 'Respeito12!') {
+        document.getElementById('admin-login').classList.add('hidden');
+        document.getElementById('admin-panel').classList.remove('hidden');
+        displayOrders();
+        displayCustomers();
+        displaySalesChart();
+      } else {
+        showNotification('Credenciais inválidas!');
+      }
+    };
+
+    document.getElementById('add-product-form').onsubmit = (e) => {
+      e.preventDefault();
+      const name = document.getElementById('product-name').value;
+      const price = parseFloat(document.getElementById('product-price').value);
+      const stock = parseInt(document.getElementById('product-stock').value);
+      const specs = document.getElementById('product-specs').value;
+      products.push({
+        id: products.length + 1,
+        name,
+        price: price.toFixed(2),
+        stock,
+        specs,
+        reviews: []
+      });
+      saveToLocalStorage();
+      displayProducts();
+      showNotification('Produto adicionado!');
+      e.target.reset();
+    };
+
+    const displayOrders = () => {
+      const orderList = document.getElementById('order-list');
+      orderList.innerHTML = '';
+      orders.forEach(order => {
+        const orderCard = `
+          <div class="bg-white p-4 rounded shadow">
+            <p><strong>Pedido #${order.id}</strong> - ${new Date(order.date).toLocaleString('pt-PT')}</p>
+            <p><strong>Cliente:</strong> ${order.name}</p>
+            <p><strong>E-mail:</strong> ${order.email}</p>
+            <p><strong>Telemóvel:</strong> ${order.phone}</p>
+            <p><strong>Morada:</strong> ${order.address}, ${order.postalCode}</p>
+            <p><strong>Itens:</strong></p>
+            <ul class="list-disc pl-5">
+              ${order.items.map(item => {
+                const product = products.find(p => p.id === item.id);
+                return `<li>${product ? product.name : 'Produto removido'} x${item.quantity} - €${(item.quantity * getPriceWithoutIVA(product ? product.price : 0)).toFixed(2)}</li>`;
+              }).join('')}
+            </ul>
+            ${order.discount ? `<p><strong>Desconto (${order.discountCode}):</strong> €${order.discount.toFixed(2)}</p>` : ''}
+            <p><strong>Total:</strong> €${order.total.toFixed(2)}</p>
+            ${order.paymentId ? `<p><strong>ID do Pagamento:</strong> ${order.paymentId}</p>` : ''}
+            <p><strong>Status:</strong> ${order.status || 'Processando'}</p>
+            <div class="mt-2">
+              <select id="order-status-${order.id}" class="border p-1 rounded">
+                <option value="Processando" ${order.status === 'Processando' ? 'selected' : ''}>Processando</option>
+                <option value="Enviado" ${order.status === 'Enviado' ? 'selected' : ''}>Enviado</option>
+                <option value="Entregue" ${order.status === 'Entregue' ? 'selected' : ''}>Entregue</option>
+                <option value="Cancelado" ${order.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+              </select>
+              <button onclick="updateOrderStatus(${order.id})" class="bg-blue-500 text-white px-2 py-1 rounded ml-2">Atualizar</button>
+            </div>
+          </div>
+        `;
+        orderList.innerHTML += orderCard;
+      });
+    };
+
+    const updateOrderStatus = (orderId) => {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+      const newStatus = document.getElementById(`order-status-${orderId}`).value;
+      order.status = newStatus;
+      saveToLocalStorage();
+      displayOrders();
+      showNotification(`Status do pedido #${orderId} atualizado para "${newStatus}"!`);
+      // Notificação simulada para o usuário
+      if (currentUser && currentUser.email === order.email) {
+        document.getElementById('track-order-result').innerHTML = `
+          <p class="text-green-500">O status do seu pedido #${orderId} foi atualizado para "${newStatus}"!</p>
+        `;
+      }
+    };
+
+    const displayCustomers = () => {
+      const customerList = document.getElementById('customer-list');
+      customerList.innerHTML = '';
+      users.forEach(user => {
+        const customerCard = `
+          <div class="bg-white p-4 rounded shadow">
+            <p><strong>Nome:</strong> ${user.name}</p>
+            <p><strong>E-mail:</strong> ${user.email}</p>
+          </div>
+        `;
+        customerList.innerHTML += customerCard;
+      });
+    };
+
+    const displaySalesChart = () => {
+      const filter = document.getElementById('sales-filter').value;
+      const now = new Date();
+      const filteredOrders = orders.filter(order => {
+        const orderDate = new Date(order.date);
+        if (filter === '7days') return now - orderDate <= 7 * 24 * 60 * 60 * 1000;
+        if (filter === '30days') return now - orderDate <= 30 * 24 * 60 * 60 * 1000;
+        return true;
+      });
+      const totalSales = filteredOrders.reduce((sum, order) => sum + order.total, 0);
+      const avgOrder = filteredOrders.length ? (totalSales / filteredOrders.length).toFixed(2) : 0;
+      const ctx = document.getElementById('sales-chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Total de Vendas', 'Nº de Pedidos', 'Média por Pedido'],
+          datasets: [{
+            label: 'Vendas (DIAS SEM IVA)',
+            data: [totalSales, filteredOrders.length, avgOrder],
+            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b']
+          }]
+        },
+        options: {
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    };
+
+    document.getElementById('sales-filter').onchange = displaySalesChart;
+
+    document.getElementById('export-csv').onclick = () => {
+      let csv = 'ID,Data,Nome,E-mail,Telemóvel,Morada,Código Postal,Total,Desconto,Código Desconto,ID Pagamento,Status\n';
+      orders.forEach(order => {
+        csv += `${order.id},${order.date},${order.name},${order.email},${order.phone},${order.address},${order.postalCode},${order.total},${order.discount || ''},${order.discountCode || ''},${order.paymentId || ''},${order.status || 'Processando'}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tidol_orders.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // Tema escuro/claro
+    document.getElementById('theme-toggle').onclick = () => {
+      document.body.classList.toggle('theme-dark');
+      const isDark = document.body.classList.contains('theme-dark');
+      document.getElementById('theme-toggle').innerHTML = isDark
+        ? `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9 9 0 0012 21a9 9 0 008.354-5.646z" /></svg>`
+        : `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`;
+    };
+
+    // Navegação
+    const sections = ['products', 'cart', 'checkout', 'account', 'admin'];
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '');
+      sections.forEach(section => {
+        document.getElementById(section).classList.add('hidden');
+      });
+      if (hash.startsWith('product-')) {
+        const id = parseInt(hash.split('-')[1]);
+        openProductModal(id);
+      } else if (sections.includes(hash)) {
+        document.getElementById(hash).classList.remove('hidden');
+        if (hash === 'cart') displayCart();
+        if (hash === 'account' && currentUser) {
+          document.getElementById('login-form').classList.add('hidden');
+          document.getElementById('account-details').classList.remove('hidden');
+          displayOrderHistory();
+          displayFavorites();
+          document.getElementById('track-order-result').innerHTML = '';
+        }
+      } else {
+        document.getElementById('products').classList.remove('hidden');
+        displayProducts();
+      }
+    });
+
+    // Inicialização
+    document.getElementById('search').oninput = displayProducts;
+    document.getElementById('sort').onchange = displayProducts;
+    displayProducts();
+    if (window.location.hash.startsWith('#product-')) {
+      const id = parseInt(window.location.hash.split('-')[1]);
+      openProductModal(id);
+    }
+  </script>
+</body>
+</html>
